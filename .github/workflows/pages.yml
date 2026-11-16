@@ -1,0 +1,29 @@
+name: Publish Alta Roma
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+      - name: Extract published site files
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release download alta-roma-v13 --pattern alta-roma-pages-v13.zip
+          unzip -q alta-roma-pages-v13.zip -d website
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: website
+      - uses: actions/deploy-pages@v4
+        id: deployment
